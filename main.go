@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
+	"time"
 
 	"tsla-mcp/internal/tesla"
 )
@@ -14,6 +17,24 @@ func main() {
 	}
 
 	app := tesla.NewApp(config)
-	log.Println("listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", app.Handler()))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	server := &http.Server{Addr: ":" + port, Handler: app.Handler()}
+	if config.RegisterPartner {
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+			defer cancel()
+			if err := app.RegisterPartnerWithRetry(ctx); err != nil {
+				log.Printf("Tesla partner registration failed: %v", err)
+				return
+			}
+			log.Println("Tesla partner account is registered")
+		}()
+	}
+
+	log.Printf("listening on :%s", port)
+	log.Fatal(server.ListenAndServe())
 }

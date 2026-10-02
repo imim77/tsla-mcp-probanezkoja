@@ -27,10 +27,19 @@ func NewApp(config Config) *App {
 // Handler returns the application's HTTP routes.
 func (a *App) Handler() http.Handler {
 	mux := http.NewServeMux()
+	if len(a.config.PublicKeyPEM) > 0 {
+		mux.HandleFunc("/.well-known/appspecific/com.tesla.3p.public-key.pem", a.publicKey)
+	}
 	mux.HandleFunc("/login", a.login)
 	mux.HandleFunc("/auth/callback", a.callback)
 	mux.HandleFunc("/me", a.me)
 	return mux
+}
+
+func (a *App) publicKey(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/x-pem-file")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(a.config.PublicKeyPEM)
 }
 
 func (a *App) tokenSource(userID string) (oauth2.TokenSource, error) {
