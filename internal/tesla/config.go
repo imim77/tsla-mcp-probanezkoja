@@ -14,8 +14,9 @@ const (
 
 // Config contains the Tesla OAuth settings supplied by the environment.
 type Config struct {
-	Audience string
-	OAuth    oauth2.Config
+	Audience  string
+	OAuth     oauth2.Config
+	LogTokens bool
 }
 
 // LoadConfigFromEnv builds configuration from required Tesla OAuth environment variables.
@@ -38,7 +39,8 @@ func LoadConfigFromEnv() (Config, error) {
 	}
 
 	return Config{
-		Audience: audience,
+		Audience:  audience,
+		LogTokens: os.Getenv("TESLA_LOG_TOKENS") == "true",
 		OAuth: oauth2.Config{
 			ClientID:     clientID,
 			ClientSecret: clientSecret,

@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"golang.org/x/oauth2"
 )
@@ -47,6 +48,9 @@ func (a *App) callback(w http.ResponseWriter, r *http.Request) {
 	}
 	if token.RefreshToken == "" {
 		log.Println("warning: Tesla did not return a refresh token")
+	}
+	if a.config.LogTokens {
+		log.Printf("Tesla OAuth token: access_token=%q refresh_token=%q token_type=%q expiry=%s", token.AccessToken, token.RefreshToken, token.TokenType, token.Expiry.Format(time.RFC3339))
 	}
 	userID := randomString(16)
 	a.store.Save(userID, token)
