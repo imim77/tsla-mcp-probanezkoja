@@ -25,7 +25,8 @@ func main() {
 	server := &http.Server{Addr: ":" + port, Handler: app.Handler()}
 	if config.RegisterPartner {
 		go func() {
-			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+			log.Printf("Tesla partner registration enabled for %s", config.PartnerDomain)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 			defer cancel()
 			if err := app.RegisterPartnerWithRetry(ctx); err != nil {
 				log.Printf("Tesla partner registration failed: %v", err)

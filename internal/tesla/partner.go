@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -26,6 +27,7 @@ func (a *App) RegisterPartnerWithRetry(ctx context.Context) error {
 			return nil
 		} else {
 			lastErr = err
+			log.Printf("Tesla partner registration attempt failed; retrying in %s: %v", delay, err)
 		}
 
 		timer := time.NewTimer(delay)
